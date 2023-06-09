@@ -1,20 +1,18 @@
-import { Deta } from "deta";
 import { update, appState } from "./index";
 
 export class Storage {
   constructor() {
     const gem = this.getCookieValue("gem");
     if (gem.length > 0) {
-      const db = Deta(gem).Base("gem");
 
       // hydrate local storage
       if (this.getLocalStorageKeys().length == 0) {
-        db.fetch().then(({ items }) => {
-          items.forEach((item: { [key: string]: any }) => {
-            localStorage.setItem(item.key, item.value);
-          });
-          update({ type: "LOAD_BUFFER", payload: 0 });
-        });
+        // db.fetch().then(({ items }) => {
+        //   items.forEach((item: { [key: string]: any }) => {
+        //     localStorage.setItem(item.key, item.value);
+        //   });
+        //   update({ type: "LOAD_BUFFER", payload: 0 });
+        // });
       }
 
       setInterval(() => {
@@ -23,7 +21,7 @@ export class Storage {
         if (value) {
           const bufferValue = JSON.stringify(appState.editor.doc.toJSON());
           if (bufferValue !== value) {
-            db.put({ key, value: bufferValue });
+            // db.put({ key, value: bufferValue });
           }
         }
       }, 100);

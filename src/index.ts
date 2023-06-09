@@ -24,7 +24,7 @@ export const appState: { editor: EditorState<typeof schema>; buffer: number } =
         keymap<typeof schema>({
           "Mod-z": undo,
           "Mod-y": redo,
-          ...ctrlZeroToNineKeymap(),
+          ...navigate(),
           ...markdownKeyBindings,
         }),
         keymap<typeof schema>(baseKeymap),
@@ -32,8 +32,9 @@ export const appState: { editor: EditorState<typeof schema>; buffer: number } =
         CursorPlugin,
       ],
     }),
-    buffer: 0,
+    buffer: 1,
   };
+
 
 const view = new EditorView<typeof schema>(main, {
   state: appState.editor,
@@ -46,10 +47,12 @@ view.focus();
 export function update(event: { type: string; payload: any }) {
   if (event.type == "EDITOR_TRANSACTION") {
     appState.editor = appState.editor.apply(event.payload);
-    storage.set(appState.buffer.toString(), appState.editor.doc.toJSON());
+    if (event.payload.steps.length > 0) {
+      storage.set(appState.buffer.toString(), appState.editor.doc.toJSON());
+    }
   }
 
-  if (event.type == "LOAD_BUFFER") {
+  if (event.type == "SWITCH_BUFFER") {
     appState.buffer = event.payload as number;
     appState.editor = appState.editor.apply(
       appState.editor.tr.replaceWith(
@@ -64,17 +67,22 @@ export function update(event: { type: string; payload: any }) {
   view.updateState(appState.editor);
 }
 
-function getDoc(buffer = 0): Node<typeof schema> {
+function getDoc(buffer = 1): Node<typeof schema> {
+
   const value = storage.get(buffer.toString());
 
-  if (!value && buffer == 0) {
+  if (!value && buffer > 1) {
     return Node.fromJSON(schema, emptyContent);
+  } else if (!value) {
+    return Node.fromJSON(schema, initalContent);
+  } else {
+    return Node.fromJSON(schema, value);
   }
 
-  return Node.fromJSON(schema, value ? value : initalContent);
+  
 }
 
-function ctrlZeroToNineKeymap(): Keymap<typeof schema> {
+function navigate(): Keymap<typeof schema> {
   const keymap: Keymap<typeof schema> = {};
   for (let i = 0; i < 10; i++) {
     keymap[`Ctrl-${i}`] = ctrl(i);
@@ -84,7 +92,7 @@ function ctrlZeroToNineKeymap(): Keymap<typeof schema> {
 
 function ctrl(index: number): () => boolean {
   return function (): boolean {
-    update({ type: "LOAD_BUFFER", payload: index });
+    update({ type: "SWITCH_BUFFER", payload: index });
     return true;
   };
 }
