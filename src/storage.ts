@@ -2,8 +2,8 @@ import { update, appState } from "./index";
 
 export class Storage {
   constructor() {
-    const gem = this.getCookieValue("gem");
-    if (gem.length > 0) {
+    const jade = this.getCookieValue("jade");
+    if (jade.length > 0) {
 
       // hydrate local storage
       if (this.getLocalStorageKeys().length == 0) {
@@ -16,7 +16,7 @@ export class Storage {
       }
 
       setInterval(() => {
-        const key = `gem-${appState.buffer}`;
+        const key = `jade-${appState.buffer}`;
         const value = localStorage.getItem(key);
         if (value) {
           const bufferValue = JSON.stringify(appState.editor.doc.toJSON());
@@ -36,12 +36,12 @@ export class Storage {
 
   private getLocalStorageKeys(): string[] {
     return Object.keys(localStorage).filter((key: string) => {
-      return key.startsWith("gem-");
+      return key.startsWith("jade-");
     });
   }
 
   public get(key: string): { [key: string]: any } | null {
-    const value = localStorage.getItem(`gem-${key}`);
+    const value = localStorage.getItem(`jade-${key}`);
     if (value) {
       return JSON.parse(value);
     }
@@ -52,7 +52,7 @@ export class Storage {
   public set(key: string, newData: any): void {
     setTimeout(() => {
       const newValue = JSON.stringify(newData);
-      localStorage.setItem(`gem-${key}`, newValue);
+      localStorage.setItem(`jade-${key}`, newValue);
     }, 100);
   }
 }

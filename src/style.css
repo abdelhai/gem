@@ -65,6 +65,7 @@ body::-webkit-scrollbar-thumb {
 
 .title:hover {
   color: var(--accent-color);
+  cursor: pointer;
 }
 
 main {
