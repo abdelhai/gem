@@ -8,91 +8,63 @@ import { baseKeymap, Keymap } from "prosemirror-commands";
 import { markdownInputRules, markdownKeyBindings } from "./markdown";
 import { CursorPlugin } from "./cursor";
 import { initalContent, emptyContent } from "./initial";
-import { Storage } from "./storage";
+import { SaveStatePlugin, load, save } from "./storage";
 
 export const main = document.querySelector("main")!;
 
-const storage = new Storage();
 
-export const appState: { editor: EditorState<typeof schema>; buffer: number } =
+export const app: { state: EditorState<typeof schema>; key: number, current: number, tbs: boolean } =
   {
-    editor: EditorState.create<typeof schema>({
-      doc: getDoc(),
+    state: EditorState.create<typeof schema>({
+      doc: Node.fromJSON(schema, emptyContent),
       schema,
       plugins: [
         history(),
         keymap<typeof schema>({
           "Mod-z": undo,
           "Mod-y": redo,
-          ...navigate(),
+          ...switcher(),
           ...markdownKeyBindings,
         }),
         keymap<typeof schema>(baseKeymap),
         markdownInputRules,
         CursorPlugin,
+        SaveStatePlugin
       ],
     }),
-    buffer: 1,
+    key: 1,
+    current: 0,
+    tbs: false,
   };
 
 
 const view = new EditorView<typeof schema>(main, {
-  state: appState.editor,
-  dispatchTransaction(transaction) {
-    update({ type: "EDITOR_TRANSACTION", payload: transaction });
-  },
+  state: app.state,
 });
 view.focus();
 
-export function update(event: { type: string; payload: any }) {
-  if (event.type == "EDITOR_TRANSACTION") {
-    appState.editor = appState.editor.apply(event.payload);
-    if (event.payload.steps.length > 0) {
-      storage.set(appState.buffer.toString(), appState.editor.doc.toJSON());
-    }
+// sync every 1s anyway
+setInterval(() => {
+  if (app.tbs) {
+    save(view, app.key, Date.now())
+    app.tbs = false;
   }
+}, 1000);
 
-  if (event.type == "SWITCH_BUFFER") {
-    appState.buffer = event.payload as number;
-    appState.editor = appState.editor.apply(
-      appState.editor.tr.replaceWith(
-        0,
-        appState.editor.doc.content.size,
-        getDoc(appState.buffer)
-      )
-    );
-    document.querySelector(".buffer")!.textContent = `*${appState.buffer}`;
-  }
 
-  view.updateState(appState.editor);
-}
-
-function getDoc(buffer = 1): Node<typeof schema> {
-
-  const value = storage.get(buffer.toString());
-
-  if (!value && buffer > 1) {
-    return Node.fromJSON(schema, emptyContent);
-  } else if (!value) {
-    return Node.fromJSON(schema, initalContent);
-  } else {
-    return Node.fromJSON(schema, value);
-  }
-
-  
-}
-
-function navigate(): Keymap<typeof schema> {
+function switcher(): Keymap<typeof schema> {
   const keymap: Keymap<typeof schema> = {};
   for (let i = 0; i < 10; i++) {
-    keymap[`Ctrl-${i}`] = ctrl(i);
+    keymap[`Ctrl-${i}`] = navigate(i);
   }
   return keymap;
 }
 
-function ctrl(index: number): () => boolean {
+function navigate(index: number): any {
   return function (): boolean {
-    update({ type: "SWITCH_BUFFER", payload: index });
+    app.key = index;
+    document.querySelector(".buffer")!.textContent = `*${app.key}`
+    load(view, app.key);
     return true;
   };
 }
