@@ -6,7 +6,7 @@
   "scripts": {
     "clear": "mkdir -p dist && rm -rf dist/* && cp public/* dist",
     "dev": "npm run clear && ./dev.js",
-    "build": "npm run clear && ./build.js",
+    "build": "npm run clear && node build.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Tanishq Kanchalra",
@@ -15,7 +15,6 @@
     "fs": false
   },
   "dependencies": {
-    "deta": "^1.0.1",
     "prosemirror-commands": "^1.1.12",
     "prosemirror-history": "^1.2.0",
     "prosemirror-inputrules": "^1.1.3",

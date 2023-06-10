@@ -1,0 +1,10 @@
+# Spacefile Docs: https://go.deta.dev/docs/spacefile/v0
+v: 0
+icon: assets/jade.png
+micros:
+  - name: jade
+    src: ./
+    engine: static
+    primary: true
+    commands: ["npm run build"]
+    serve: dist
