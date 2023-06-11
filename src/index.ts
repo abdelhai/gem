@@ -7,35 +7,36 @@ import { keymap } from "prosemirror-keymap";
 import { baseKeymap, Keymap } from "prosemirror-commands";
 import { markdownInputRules, markdownKeyBindings } from "./markdown";
 import { CursorPlugin } from "./cursor";
-import { initalContent, emptyContent } from "./initial";
+import { welcome, empty } from "./initial";
 import { SaveStatePlugin, load, save } from "./storage";
 
 export const main = document.querySelector("main")!;
 
 
-export const app: { state: EditorState<typeof schema>; key: number, current: number, tbs: boolean } =
-  {
-    state: EditorState.create<typeof schema>({
-      doc: Node.fromJSON(schema, emptyContent),
-      schema,
-      plugins: [
-        history(),
-        keymap<typeof schema>({
-          "Mod-z": undo,
-          "Mod-y": redo,
-          ...switcher(),
-          ...markdownKeyBindings,
-        }),
-        keymap<typeof schema>(baseKeymap),
-        markdownInputRules,
-        CursorPlugin,
-        SaveStatePlugin
-      ],
-    }),
-    key: 1,
-    current: 0,
-    tbs: false,
-  };
+export const app: { state: EditorState<typeof schema>; key: number, current: number, tbs: boolean, saved: any } =
+{
+  state: EditorState.create<typeof schema>({
+    doc: Node.fromJSON(schema, empty),
+    schema,
+    plugins: [
+      history(),
+      keymap<typeof schema>({
+        "Mod-z": undo,
+        "Mod-y": redo,
+        ...switcher(),
+        ...markdownKeyBindings,
+      }),
+      keymap<typeof schema>(baseKeymap),
+      markdownInputRules,
+      CursorPlugin,
+      SaveStatePlugin
+    ],
+  }),
+  key: 1,
+  current: 0,
+  tbs: false,
+  saved: null,
+};
 
 
 const view = new EditorView<typeof schema>(main, {

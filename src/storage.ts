@@ -3,7 +3,7 @@ import { Plugin } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import { schema } from "./schema";
 import { app } from "./index";
-import { emptyContent } from "./initial";
+import { empty, welcome } from "./initial";
 
 
 export const save = (view: EditorView<typeof schema>, key: number, time: number) => {
@@ -27,14 +27,17 @@ export const load = (view: EditorView<typeof schema>, key: number) => {
     if (r.ok) {
       r.json().then((data) => {
         const tr = view.state.tr;
+        let doc = Node.fromJSON(schema, welcome)
         if (data.doc) {
-          const doc = Node.fromJSON(schema, data.doc);
-          tr.replaceWith(0, tr.doc.content.size, doc);
-          view.dispatch(tr);
+          doc = Node.fromJSON(schema, data.doc);
         } else {
-          tr.replaceWith(0, tr.doc.content.size, Node.fromJSON(schema, emptyContent));
-          view.dispatch(tr);
+          if (key !== 1) {
+            doc = Node.fromJSON(schema, empty);
+          }
         }
+        app.saved = doc;
+        tr.replaceWith(0, tr.doc.content.size, doc);
+        view.dispatch(tr);
       });
 
     }
@@ -46,6 +49,7 @@ export const SaveStatePlugin = new Plugin({
     load(view, app.key);
     return {
       update: (view) => {
+        if (app.saved.eq(view.state.doc)) return;
         save(view, app.key,  Date.now())
       }
     }
