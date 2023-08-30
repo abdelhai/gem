@@ -15,6 +15,7 @@
     "fs": false
   },
   "dependencies": {
+    "deta": "^2.0.0",
     "prosemirror-commands": "^1.1.12",
     "prosemirror-history": "^1.2.0",
     "prosemirror-inputrules": "^1.1.3",

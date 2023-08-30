@@ -1,6 +1,6 @@
 ---
 app_name: Jade
-title: A simple and fun notes app.
+tagline: A simple & fun notes app.
 theme_color: "#17d49b"
 git: "https://github.com/abdelhai/jade"
 ---

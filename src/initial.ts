@@ -9,7 +9,7 @@ export const welcome = {
       content: [
         {
           type: "text",
-          text: "Welcome to Jade – a lightweight, performant, minimal editor designed to be aesthetic and fun. ",
+          text: "Welcome to Jade – a lightweight and minimal editor designed to be aesthetic and fun.",
         },
       ],
     },
